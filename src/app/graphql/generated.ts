@@ -554,7 +554,11 @@ export type AllEngagementBySportQueryVariables = Exact<{ [key: string]: never; }
 
 export type AllEngagementBySportQuery = { allEngagementBySports: Array<{ id: string, sport: string, followers: number, athleteCount: number, avgEngagementRate: number } | null> | null };
 
-export type AllAthletesQueryVariables = Exact<{ [key: string]: never; }>;
+export type AllAthletesQueryVariables = Exact<{
+  filter?: InputMaybe<AthleteFilter>;
+  sortField?: InputMaybe<Scalars['String']['input']>;
+  sortOrder?: InputMaybe<Scalars['String']['input']>;
+}>;
 
 
 export type AllAthletesQuery = { allAthletes: Array<{ id: string, name: string, sport: string, status: string, followers: number, earnings: number, avatar: string, bio: string, stats: unknown } | null> | null };
@@ -637,8 +641,8 @@ export const AllEngagementBySportDocument = gql`
     }
   }
 export const AllAthletesDocument = gql`
-    query AllAthletes {
-  allAthletes {
+    query AllAthletes($filter: AthleteFilter, $sortField: String, $sortOrder: String) {
+  allAthletes(filter: $filter, sortField: $sortField, sortOrder: $sortOrder) {
     id
     name
     sport

@@ -1,0 +1,34 @@
+.analytics-container {
+  h1 {
+    margin: 0 0 24px;
+    font-weight: 500;
+  }
+}
+
+.spinner-container {
+  display: flex;
+  justify-content: center;
+  padding: 48px;
+}
+
+.stat-cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 16px;
+  margin-bottom: 24px;
+}
+
+.charts-row {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+  gap: 16px;
+}
+
+.chart-panel {
+  min-height: 350px;
+
+  canvas {
+    width: 100% !important;
+    height: 300px !important;
+  }
+}

@@ -1,0 +1,49 @@
+<div class="analytics-container">
+  <h1>Platform Analytics</h1>
+
+  @if (loading()) {
+    <div class="spinner-container">
+      <mat-spinner diameter="48"></mat-spinner>
+    </div>
+  } @else {
+    @if (stats(); as s) {
+      <div class="stat-cards">
+        <app-stat-card
+          label="Total Athletes"
+          [value]="s.totalAthletes.toString()"
+          icon="sports"
+        />
+        <app-stat-card
+          label="Active Fans"
+          [value]="formatStatValue(s.totalFollowers)"
+          icon="people"
+        />
+        <app-stat-card
+          label="Monthly Revenue"
+          [value]="'$' + formatStatValue(s.totalEarnings)"
+          icon="payments"
+        />
+        <app-stat-card
+          label="Live Streams"
+          [value]="s.activeAthletes.toString()"
+          icon="live_tv"
+        />
+      </div>
+    }
+
+    <div class="charts-row">
+      <app-chart-wrapper title="Fan Growth (Last 12 Months)" class="chart-panel">
+        <canvas
+          baseChart
+          [type]="'line'"
+          [data]="fanGrowthChartData()"
+          [options]="fanGrowthChartOptions"
+        ></canvas>
+      </app-chart-wrapper>
+
+      <app-chart-wrapper title="Engagement by Sport" class="chart-panel">
+        <app-engagement-chart [engagementData]="engagement()" />
+      </app-chart-wrapper>
+    </div>
+  }
+</div>

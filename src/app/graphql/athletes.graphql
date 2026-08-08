@@ -1,5 +1,9 @@
-query AllAthletes {
-  allAthletes {
+query AllAthletes(
+  $filter: AthleteFilter
+  $sortField: String
+  $sortOrder: String
+) {
+  allAthletes(filter: $filter, sortField: $sortField, sortOrder: $sortOrder) {
     id
     name
     sport

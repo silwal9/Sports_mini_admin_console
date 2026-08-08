@@ -1,0 +1,96 @@
+<div class="athletes-container">
+  <h1>Athletes</h1>
+
+  <div class="filters">
+    <mat-form-field appearance="outline" class="search-field">
+      <mat-label>Search athletes</mat-label>
+      <mat-icon matPrefix>search</mat-icon>
+      <input
+        matInput
+        [ngModel]="searchTerm()"
+        (ngModelChange)="onSearch($event)"
+        placeholder="Search by name..."
+      />
+    </mat-form-field>
+
+    <mat-form-field appearance="outline" class="sport-filter">
+      <mat-label>Sport</mat-label>
+      <mat-select
+        [ngModel]="sportFilter()"
+        (ngModelChange)="onSportFilter($event)"
+      >
+        <mat-option value="">All Sports</mat-option>
+        @for (sport of sports(); track sport) {
+          <mat-option [value]="sport">{{ sport }}</mat-option>
+        }
+      </mat-select>
+    </mat-form-field>
+  </div>
+
+  @if (loading()) {
+    <div class="spinner-container">
+      <mat-spinner diameter="48"></mat-spinner>
+    </div>
+  } @else {
+    <div class="table-container">
+      <table
+        mat-table
+        [dataSource]="filteredAthletes()"
+        matSort
+        (matSortChange)="onSortChange($event)"
+      >
+        <ng-container matColumnDef="avatar">
+          <th mat-header-cell *matHeaderCellDef>Avatar</th>
+          <td mat-cell *matCellDef="let athlete">
+            <img
+              [src]="athlete.avatar"
+              [alt]="athlete.name"
+              class="avatar-small"
+            />
+          </td>
+        </ng-container>
+
+        <ng-container matColumnDef="name">
+          <th mat-header-cell *matHeaderCellDef mat-sort-header>Name</th>
+          <td mat-cell *matCellDef="let athlete">{{ athlete.name }}</td>
+        </ng-container>
+
+        <ng-container matColumnDef="sport">
+          <th mat-header-cell *matHeaderCellDef mat-sort-header>Sport</th>
+          <td mat-cell *matCellDef="let athlete">{{ athlete.sport }}</td>
+        </ng-container>
+
+        <ng-container matColumnDef="status">
+          <th mat-header-cell *matHeaderCellDef mat-sort-header>Status</th>
+          <td mat-cell *matCellDef="let athlete">
+            <mat-chip [highlighted]="athlete.status === 'active'">
+              {{ athlete.status | titlecase }}
+            </mat-chip>
+          </td>
+        </ng-container>
+
+        <ng-container matColumnDef="followers">
+          <th mat-header-cell *matHeaderCellDef mat-sort-header>Followers</th>
+          <td mat-cell *matCellDef="let athlete">
+            {{ athlete.followers | number }}
+          </td>
+        </ng-container>
+
+        <ng-container matColumnDef="earnings">
+          <th mat-header-cell *matHeaderCellDef mat-sort-header>Earnings</th>
+          <td mat-cell *matCellDef="let athlete">
+            {{ athlete.earnings | currency:'USD':'symbol':'1.0-0' }}
+          </td>
+        </ng-container>
+
+        <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+        <tr
+          mat-row
+          *matRowDef="let row; columns: displayedColumns"
+          (click)="onRowClick(row)"
+          class="clickable-row"
+        ></tr>
+      </table>
+    </div>
+  }
+</div>

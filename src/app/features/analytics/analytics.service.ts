@@ -9,7 +9,7 @@ import {
   EngagementBySport,
 } from '../../graphql/generated';
 
-@Injectable({ providedIn: 'root' })
+@Injectable()
 export class AnalyticsService {
   private platformStatsGQL = inject(AllPlatformStatsGQL);
   private fanGrowthGQL = inject(AllFanGrowthGQL);
@@ -17,24 +17,24 @@ export class AnalyticsService {
 
   fetchPlatformStats() {
     return this.platformStatsGQL
-      .watch()
-      .valueChanges.pipe(
+      .fetch()
+      .pipe(
         map((r) => (r.data?.allPlatformStats ?? []).filter(Boolean) as PlatformStat[])
       );
   }
 
   fetchFanGrowth() {
     return this.fanGrowthGQL
-      .watch()
-      .valueChanges.pipe(
+      .fetch()
+      .pipe(
         map((r) => (r.data?.allFanGrowths ?? []).filter(Boolean) as FanGrowth[])
       );
   }
 
   fetchEngagement() {
     return this.engagementGQL
-      .watch()
-      .valueChanges.pipe(
+      .fetch()
+      .pipe(
         map((r) => (r.data?.allEngagementBySports ?? []).filter(Boolean) as EngagementBySport[])
       );
   }

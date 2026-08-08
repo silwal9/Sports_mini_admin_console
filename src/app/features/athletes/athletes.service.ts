@@ -1,16 +1,22 @@
-import { Injectable, inject } from '@angular/core';
-import { map } from 'rxjs';
-import { AllAthletesGQL, Athlete } from '../../graphql/generated';
+import { inject, Injectable } from '@angular/core';
+import { map, Observable } from 'rxjs';
+import {
+  AllAthletesGQL,
+  Athlete,
+  AllAthletesQueryVariables,
+} from '../../graphql/generated';
 
-@Injectable({ providedIn: 'root' })
+@Injectable()
 export class AthletesService {
   private allAthletesGQL = inject(AllAthletesGQL);
 
-  fetchAthletes() {
+  fetchAthletes(variables?: AllAthletesQueryVariables): Observable<Athlete[]> {
     return this.allAthletesGQL
-      .watch()
-      .valueChanges.pipe(
-        map((result) => (result.data?.allAthletes ?? []).filter(Boolean) as Athlete[])
+      .fetch(variables ? { variables } : undefined)
+      .pipe(
+        map((result) =>
+          (result.data?.allAthletes ?? []).filter(Boolean) as Athlete[]
+        )
       );
   }
 }

@@ -2,6 +2,7 @@ import { Component, input, computed } from '@angular/core';
 import { BaseChartDirective } from 'ng2-charts';
 import { ChartConfiguration } from 'chart.js';
 import { EngagementBySport } from '../../../graphql/generated';
+import { DARK_CHART_SCALE, DARK_CHART_LEGEND } from '../../../shared/chart-defaults';
 
 @Component({
   selector: 'app-engagement-chart',
@@ -59,20 +60,7 @@ export class EngagementChartComponent {
   chartOptions: ChartConfiguration<'bar'>['options'] = {
     responsive: true,
     maintainAspectRatio: false,
-    plugins: {
-      legend: {
-        labels: { color: 'rgba(255, 255, 255, 0.7)' },
-      },
-    },
-    scales: {
-      x: {
-        ticks: { color: 'rgba(255, 255, 255, 0.7)' },
-        grid: { color: 'rgba(255, 255, 255, 0.1)' },
-      },
-      y: {
-        ticks: { color: 'rgba(255, 255, 255, 0.7)' },
-        grid: { color: 'rgba(255, 255, 255, 0.1)' },
-      },
-    },
+    plugins: { legend: DARK_CHART_LEGEND },
+    scales: { x: DARK_CHART_SCALE, y: DARK_CHART_SCALE },
   };
 }

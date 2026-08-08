@@ -1,6 +1,6 @@
-import { Component, inject, signal, computed, OnInit, OnDestroy } from '@angular/core';
+import { Component, inject, signal, OnInit, OnDestroy } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { Subject, takeUntil } from 'rxjs';
+import { Subject, switchMap, takeUntil, startWith } from 'rxjs';
 import { MatTableModule } from '@angular/material/table';
 import { MatSortModule, Sort } from '@angular/material/sort';
 import { MatFormFieldModule } from '@angular/material/form-field';
@@ -14,7 +14,7 @@ import { CurrencyPipe, DecimalPipe, TitleCasePipe } from '@angular/common';
 
 import { AthletesService } from './athletes.service';
 import { AthleteDialogComponent } from './athlete-card/athlete-dialog.component';
-import { Athlete } from '../../graphql/generated';
+import { Athlete, AllAthletesQueryVariables, AthleteFilter } from '../../graphql/generated';
 
 @Component({
   selector: 'app-athletes',
@@ -34,6 +34,7 @@ import { Athlete } from '../../graphql/generated';
     DecimalPipe,
     TitleCasePipe,
   ],
+  providers: [AthletesService],
   templateUrl: './athletes.component.html',
   styleUrl: './athletes.component.scss',
 })
@@ -41,7 +42,10 @@ export class AthletesComponent implements OnInit, OnDestroy {
   private athletesService = inject(AthletesService);
   private dialog = inject(MatDialog);
   private destroy$ = new Subject<void>();
+  private queryTrigger$ = new Subject<void>();
+
   athletes = signal<Athlete[]>([]);
+  sports = signal<string[]>([]);
   loading = signal(true);
   searchTerm = signal('');
   sportFilter = signal('');
@@ -49,41 +53,23 @@ export class AthletesComponent implements OnInit, OnDestroy {
 
   displayedColumns = ['avatar', 'name', 'sport', 'status', 'followers', 'earnings'];
 
-  sports = computed(() => {
-    const all = this.athletes();
-    return [...new Set(all.map((a) => a.sport))].sort();
-  });
-
-  filteredAthletes = computed(() => {
-    let list = this.athletes();
-    const term = this.searchTerm().toLowerCase();
-    const sport = this.sportFilter();
-
-    if (term) {
-      list = list.filter((a) => a.name.toLowerCase().includes(term));
-    }
-    if (sport) {
-      list = list.filter((a) => a.sport === sport);
-    }
-
-    const sort = this.currentSort();
-    if (sort.active && sort.direction) {
-      list = [...list].sort((a, b) => {
-        const aVal = (a as Record<string, unknown>)[sort.active];
-        const bVal = (b as Record<string, unknown>)[sort.active];
-        const cmp = typeof aVal === 'number' && typeof bVal === 'number'
-          ? aVal - bVal
-          : String(aVal).localeCompare(String(bVal));
-        return sort.direction === 'asc' ? cmp : -cmp;
-      });
-    }
-
-    return list;
-  });
-
   ngOnInit(): void {
+    // Load all athletes first to populate the sport dropdown
     this.athletesService.fetchAthletes()
       .pipe(takeUntil(this.destroy$))
+      .subscribe((athletes) => {
+        this.sports.set([...new Set(athletes.map((a) => a.sport))].sort());
+      });
+
+    this.queryTrigger$
+      .pipe(
+        startWith(undefined),
+        switchMap(() => {
+          this.loading.set(true);
+          return this.athletesService.fetchAthletes(this.buildQueryParams());
+        }),
+        takeUntil(this.destroy$),
+      )
       .subscribe((athletes) => {
         this.athletes.set(athletes);
         this.loading.set(false);
@@ -97,14 +83,17 @@ export class AthletesComponent implements OnInit, OnDestroy {
 
   onSearch(term: string): void {
     this.searchTerm.set(term);
+    this.queryTrigger$.next();
   }
 
   onSportFilter(sport: string): void {
     this.sportFilter.set(sport);
+    this.queryTrigger$.next();
   }
 
   onSortChange(sort: Sort): void {
     this.currentSort.set(sort);
+    this.queryTrigger$.next();
   }
 
   onRowClick(athlete: Athlete): void {
@@ -113,5 +102,25 @@ export class AthletesComponent implements OnInit, OnDestroy {
       width: '600px',
       maxWidth: '90vw',
     });
+  }
+
+  private buildQueryParams(): AllAthletesQueryVariables {
+    const filter: AthleteFilter = {};
+    const term = this.searchTerm();
+    const sport = this.sportFilter();
+
+    if (term) {
+      filter.q = term;
+    }
+    if (sport) {
+      filter.sport = sport;
+    }
+
+    const sort = this.currentSort();
+    return {
+      filter: Object.keys(filter).length > 0 ? filter : undefined,
+      sortField: sort.active && sort.direction ? sort.active : undefined,
+      sortOrder: sort.active && sort.direction ? sort.direction : undefined,
+    };
   }
 }

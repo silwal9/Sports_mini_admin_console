@@ -1,9 +1,15 @@
-import { Component, input } from '@angular/core';
+import { Component, computed, input } from '@angular/core';
 import { MatCardModule } from '@angular/material/card';
 import { MatChipsModule } from '@angular/material/chips';
 import { MatIconModule } from '@angular/material/icon';
 import { CurrencyPipe, DecimalPipe, TitleCasePipe } from '@angular/common';
 import { Athlete } from '../../../graphql/generated';
+
+export interface AthleteStats {
+  gamesPlayed: number;
+  careerHighlights: number;
+  endorsements: number;
+}
 
 @Component({
   selector: 'app-athlete-card',
@@ -135,11 +141,11 @@ import { Athlete } from '../../../graphql/generated';
 export class AthleteCardComponent {
   athlete = input.required<Athlete>();
 
-  athleteStats = () => {
+  athleteStats = computed<AthleteStats | null>(() => {
     const stats = this.athlete().stats;
     if (stats && typeof stats === 'object') {
-      return stats as { gamesPlayed: number; careerHighlights: number; endorsements: number };
+      return stats as AthleteStats;
     }
     return null;
-  };
+  });
 }

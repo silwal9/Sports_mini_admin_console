@@ -1,5 +1,5 @@
 import { Component, inject, signal, OnInit, OnDestroy } from '@angular/core';
-import { Subject, takeUntil } from 'rxjs';
+import { Subject, forkJoin, takeUntil } from 'rxjs';
 import { BaseChartDirective } from 'ng2-charts';
 import { ChartConfiguration } from 'chart.js';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
@@ -8,6 +8,7 @@ import { AnalyticsService } from './analytics.service';
 import { EngagementChartComponent } from './engagement-chart/engagement-chart.component';
 import { StatCardComponent } from '../../shared/components/stat-card/stat-card.component';
 import { ChartWrapperComponent } from '../../shared/components/chart-wrapper/chart-wrapper.component';
+import { DARK_CHART_SCALE, DARK_CHART_LEGEND } from '../../shared/chart-defaults';
 import {
   PlatformStat,
   FanGrowth,
@@ -24,6 +25,7 @@ import {
     ChartWrapperComponent,
     EngagementChartComponent,
   ],
+  providers: [AnalyticsService],
   templateUrl: './analytics.component.html',
   styleUrl: './analytics.component.scss',
 })
@@ -44,67 +46,32 @@ export class AnalyticsComponent implements OnInit, OnDestroy {
   fanGrowthChartOptions: ChartConfiguration<'line'>['options'] = {
     responsive: true,
     maintainAspectRatio: false,
-    plugins: {
-      legend: {
-        labels: { color: 'rgba(255, 255, 255, 0.7)' },
-      },
-    },
+    plugins: { legend: DARK_CHART_LEGEND },
     scales: {
-      x: {
-        ticks: { color: 'rgba(255, 255, 255, 0.7)' },
-        grid: { color: 'rgba(255, 255, 255, 0.1)' },
-      },
+      x: DARK_CHART_SCALE,
       y: {
+        ...DARK_CHART_SCALE,
         ticks: {
-          color: 'rgba(255, 255, 255, 0.7)',
+          ...DARK_CHART_SCALE.ticks,
           callback: (value) => `${Number(value) / 1_000_000}M`,
         },
-        grid: { color: 'rgba(255, 255, 255, 0.1)' },
       },
     },
   };
 
   ngOnInit(): void {
-    this.analyticsService.fetchPlatformStats()
+    forkJoin({
+      stats: this.analyticsService.fetchPlatformStats(),
+      fanGrowth: this.analyticsService.fetchFanGrowth(),
+      engagement: this.analyticsService.fetchEngagement(),
+    })
       .pipe(takeUntil(this.destroy$))
-      .subscribe((stats) => {
+      .subscribe(({ stats, fanGrowth, engagement }) => {
         this.stats.set(stats[0] ?? null);
-      });
-
-    this.analyticsService.fetchFanGrowth()
-      .pipe(takeUntil(this.destroy$))
-      .subscribe((data) => {
-        this.fanGrowth.set(data);
-        this.fanGrowthChartData.set({
-          labels: data.map((d) => this.formatMonth(d.month)),
-          datasets: [
-            {
-              label: 'Total Fans',
-              data: data.map((d) => d.totalFans),
-              borderColor: '#f44336',
-              backgroundColor: 'rgba(244, 67, 54, 0.1)',
-              fill: true,
-              tension: 0.3,
-              pointBackgroundColor: '#f44336',
-            },
-            {
-              label: 'New Fans',
-              data: data.map((d) => d.newFans),
-              borderColor: '#ff9800',
-              backgroundColor: 'rgba(255, 152, 0, 0.1)',
-              fill: true,
-              tension: 0.3,
-              pointBackgroundColor: '#ff9800',
-            },
-          ],
-        });
+        this.fanGrowth.set(fanGrowth);
+        this.engagement.set(engagement);
+        this.fanGrowthChartData.set(this.buildFanGrowthChart(fanGrowth));
         this.loading.set(false);
-      });
-
-    this.analyticsService.fetchEngagement()
-      .pipe(takeUntil(this.destroy$))
-      .subscribe((data) => {
-        this.engagement.set(data);
       });
   }
 
@@ -121,6 +88,32 @@ export class AnalyticsComponent implements OnInit, OnDestroy {
       return `${(value / 1_000).toFixed(1)}K`;
     }
     return value.toString();
+  }
+
+  private buildFanGrowthChart(data: FanGrowth[]): ChartConfiguration<'line'>['data'] {
+    return {
+      labels: data.map((d) => this.formatMonth(d.month)),
+      datasets: [
+        {
+          label: 'Total Fans',
+          data: data.map((d) => d.totalFans),
+          borderColor: '#f44336',
+          backgroundColor: 'rgba(244, 67, 54, 0.1)',
+          fill: true,
+          tension: 0.3,
+          pointBackgroundColor: '#f44336',
+        },
+        {
+          label: 'New Fans',
+          data: data.map((d) => d.newFans),
+          borderColor: '#ff9800',
+          backgroundColor: 'rgba(255, 152, 0, 0.1)',
+          fill: true,
+          tension: 0.3,
+          pointBackgroundColor: '#ff9800',
+        },
+      ],
+    };
   }
 
   private formatMonth(month: string): string {

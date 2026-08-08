@@ -1,0 +1,19 @@
+.shell-container {
+  position: absolute;
+  top: 64px;
+  bottom: 0;
+  left: 0;
+  right: 0;
+}
+
+mat-sidenav {
+  width: 220px;
+}
+
+.content-area {
+  padding: 24px;
+}
+
+.active-link {
+  font-weight: bold;
+}

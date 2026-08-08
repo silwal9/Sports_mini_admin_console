@@ -1,0 +1,10 @@
+<mat-toolbar color="primary">
+  <button mat-icon-button (click)="menuToggle.emit()">
+    <mat-icon>menu</mat-icon>
+  </button>
+  <span>Buzzerboard Admin</span>
+  <span class="spacer"></span>
+  <button mat-icon-button (click)="themeService.toggleTheme()">
+    <mat-icon>{{ themeIcon }}</mat-icon>
+  </button>
+</mat-toolbar>

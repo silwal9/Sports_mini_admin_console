@@ -2,7 +2,7 @@
 
 A sports platform admin console built with **Angular 19**, **GraphQL (Apollo Client)**, and **Angular Material**. Designed as an internal tool for managing athletes and monitoring platform analytics — the kind of dashboard a sports community platform operates on daily.
 
-**Live Demo:** [Vercel Link]
+**Live Demo:** sports-mini-admin-console-b4p9.vercel.app
 
 ---
 
@@ -17,12 +17,6 @@ A sports platform admin console built with **Angular 19**, **GraphQL (Apollo Cli
 | ng2-charts / Chart.js | Data visualization |
 | json-graphql-server | Mock GraphQL API from JSON |
 | TypeScript (strict mode) | End-to-end type safety |
-
-## Screenshots
-
-_[Athletes Management screenshot]_
-
-_[Platform Analytics screenshot]_
 
 ---
 

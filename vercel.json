@@ -1,0 +1,6 @@
+{
+  "buildCommand": "ng build",
+  "outputDirectory": "dist/buzzerboard/browser",
+  "framework": null,
+  "rewrites": [{ "source": "/(.*)", "destination": "/index.html" }]
+}

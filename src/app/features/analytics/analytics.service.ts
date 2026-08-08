@@ -1,5 +1,5 @@
 import { Injectable, inject } from '@angular/core';
-import { map } from 'rxjs';
+import { catchError, map, of } from 'rxjs';
 import {
   AllPlatformStatsGQL,
   AllFanGrowthGQL,
@@ -8,6 +8,11 @@ import {
   FanGrowth,
   EngagementBySport,
 } from '../../graphql/generated';
+import {
+  FALLBACK_PLATFORM_STATS,
+  FALLBACK_FAN_GROWTH,
+  FALLBACK_ENGAGEMENT,
+} from '../../core/data/fallback-data';
 
 @Injectable()
 export class AnalyticsService {
@@ -19,7 +24,8 @@ export class AnalyticsService {
     return this.platformStatsGQL
       .fetch()
       .pipe(
-        map((r) => (r.data?.allPlatformStats ?? []).filter(Boolean) as PlatformStat[])
+        map((r) => (r.data?.allPlatformStats ?? []).filter(Boolean) as PlatformStat[]),
+        catchError(() => of(FALLBACK_PLATFORM_STATS))
       );
   }
 
@@ -27,7 +33,8 @@ export class AnalyticsService {
     return this.fanGrowthGQL
       .fetch()
       .pipe(
-        map((r) => (r.data?.allFanGrowths ?? []).filter(Boolean) as FanGrowth[])
+        map((r) => (r.data?.allFanGrowths ?? []).filter(Boolean) as FanGrowth[]),
+        catchError(() => of(FALLBACK_FAN_GROWTH))
       );
   }
 
@@ -35,7 +42,8 @@ export class AnalyticsService {
     return this.engagementGQL
       .fetch()
       .pipe(
-        map((r) => (r.data?.allEngagementBySports ?? []).filter(Boolean) as EngagementBySport[])
+        map((r) => (r.data?.allEngagementBySports ?? []).filter(Boolean) as EngagementBySport[]),
+        catchError(() => of(FALLBACK_ENGAGEMENT))
       );
   }
 }

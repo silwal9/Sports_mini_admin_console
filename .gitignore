@@ -35,10 +35,7 @@ yarn-error.log
 /coverage
 /libpeerconnection.log
 testem.log
-claude.md
 /typings
-.agents/
-.claude/
 
 # System files
 .DS_Store

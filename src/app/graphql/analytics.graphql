@@ -1,0 +1,33 @@
+query AllPlatformStats {
+  allPlatformStats {
+    id
+    totalAthletes
+    totalFollowers
+    totalEarnings
+    activeAthletes
+    inactiveAthletes
+    averageFollowers
+    averageEarnings
+    topSport
+    monthlyGrowthRate
+  }
+}
+
+query AllFanGrowth {
+  allFanGrowths {
+    id
+    month
+    totalFans
+    newFans
+  }
+}
+
+query AllEngagementBySport {
+  allEngagementBySports {
+    id
+    sport
+    followers
+    athleteCount
+    avgEngagementRate
+  }
+}

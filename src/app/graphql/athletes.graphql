@@ -1,0 +1,27 @@
+query AllAthletes {
+  allAthletes {
+    id
+    name
+    sport
+    status
+    followers
+    earnings
+    avatar
+    bio
+    stats
+  }
+}
+
+query Athlete($id: ID!) {
+  Athlete(id: $id) {
+    id
+    name
+    sport
+    status
+    followers
+    earnings
+    avatar
+    bio
+    stats
+  }
+}
